@@ -1,0 +1,6 @@
+/Users/vitaliymaslikov/Projects/CombinatoricsOptimization01/CombinatoricsOptimization01/obj/x86/Debug/.NETFramework,Version=v4.5.AssemblyAttribute.cs
+/Users/vitaliymaslikov/Projects/CombinatoricsOptimization01/CombinatoricsOptimization01/bin/Debug/CombinatoricsOptimization01.exe.mdb
+/Users/vitaliymaslikov/Projects/CombinatoricsOptimization01/CombinatoricsOptimization01/bin/Debug/CombinatoricsOptimization01.exe
+/Users/vitaliymaslikov/Projects/CombinatoricsOptimization01/CombinatoricsOptimization01/obj/x86/Debug/CombinatoricsOptimization01.exe
+/Users/vitaliymaslikov/Projects/CombinatoricsOptimization01/CombinatoricsOptimization01/obj/x86/Debug/CombinatoricsOptimization01.exe.mdb
+/Users/vitaliymaslikov/Projects/CombinatoricsOptimization01/CombinatoricsOptimization01/bin/Debug/EPPlus.dll
