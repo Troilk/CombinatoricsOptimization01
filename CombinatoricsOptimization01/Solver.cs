@@ -12,7 +12,7 @@ namespace CombinatoricsOptimization01
         {
             // initial variables initialization
             double bestCost = currentSolution.Cost;
-            double deltaCost;
+            double deltaCost = 0.0;
             int n = currentSolution.Path.Length;
             int temp, bestI = 0, bestJ = 0;
             int i0, i1, i2, j0, j1, j2;
@@ -37,11 +37,36 @@ namespace CombinatoricsOptimization01
                     j1 = path[j];
                     j2 = path[j + 1];
 
-                    deltaCost = (graph[i1, j2] + graph[j0, i1] + graph[j1, i2]) - 
-                                (graph[i1, i2] + graph[j0, j1] + graph[j1, j2]);
+                    if (i == 0 && j == n - 1)
+                    {
+                        deltaCost = (graph[j0, i1] + graph[i1, j1] + graph[j1, i2]) -
+                                    (graph[j0, j1] + graph[j1, i1] + graph[i1, i2]);
+                    }
+                    else
+                    {
+                        if (j - i == 1)
+                        {
+                            deltaCost = (graph[i1, j2] + graph[j1, i1]) - (graph[i1, j1] + graph[j1, j2]);
+                        }
+                        else
+                        {
+                            deltaCost = (graph[j0, i1] + graph[i1, j2] + graph[j1, i2]) -
+                                        (graph[i1, i2] + graph[j0, j1] + graph[j1, j2]);
+                        }
 
-                    if (i != 0)
                         deltaCost += graph[i0, j1] - graph[i0, i1];
+                    }
+
+                    // hard test
+//                    int[] testS = (int[])currentSolution.Path.Clone();
+//                    testS[i] = currentSolution.Path[j];
+//                    testS[j] = currentSolution.Path[i];
+//                    if (Solution.GetSolutionCost(testS, graph) - (currentSolution.Cost + deltaCost) > 0.000000001)
+//                    {
+//                        Log.LogError(Solution.GetSolutionCost(testS, graph) - (currentSolution.Cost + deltaCost));
+//                    }
+                    //deltaCost = Solution.GetSolutionCost(testS, graph) - currentSolution.Cost;
+                    //
 
                     if (deltaCost < InputData.LESS_INFINITY)
                     {
@@ -50,11 +75,13 @@ namespace CombinatoricsOptimization01
                             bestCost = currentSolution.Cost + deltaCost;
                             bestI = i;
                             bestJ = j;
+                            //goto FirstBetter;
                         }
                     }
                 }
             }
-
+                
+            //FirstBetter:
             if (bestCost < currentSolution.Cost)
             {
                 outSolution.CopySolution(currentSolution);

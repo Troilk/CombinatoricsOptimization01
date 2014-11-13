@@ -1,4 +1,5 @@
 ﻿using System;
+using OfficeOpenXml;
 
 namespace CombinatoricsOptimization01
 {
@@ -38,6 +39,17 @@ namespace CombinatoricsOptimization01
 
             for (int i = 0; i < pathLength; ++i)
                 this.path[i] = otherPath[i];
+        }
+
+        public void PrintToXLS(ExcelWorksheet worksheet, int startRow, int startCol)
+        {
+            int pathLength = this.path.Length;
+
+            for (int i = 0; i < pathLength; ++i)
+            {
+                worksheet.Cells[startRow, startCol + i].Value = this.path[i];
+                worksheet.Column(startCol + i).Width = 4.0;
+            }
         }
 
         public static double GetSolutionCost(int[] path, double[,] graphMatrix)

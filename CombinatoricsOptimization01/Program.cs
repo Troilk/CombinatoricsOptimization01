@@ -118,9 +118,10 @@ namespace CombinatoricsOptimization01
                     //debug
 //                    if (i == 0)
 //                    inputData.PrintGraph();
-                    //Solution sl = new Solution(new int[]{ 2, 13, 1, 10, 12, 9, 7, 8, 0, 11, 16, 15, 6, 5, 14, 4, 3 }, inputData.GraphMatrix);
+                    //Solution sl = new Solution(new int[]{ 12, 9, 7, 8, 13, 0, 14, 5, 10, 4, 1, 6, 11, 16, 2, 15, 3}, inputData.GraphMatrix);
                      
                     // run algorithms and measure time
+
                     for (int j = 0; j < InputData.INITIAL_SOLUTIONS_COUNT; ++j)
                     {
                         GC.Collect();
@@ -148,7 +149,9 @@ namespace CombinatoricsOptimization01
                     PutValuesRow(worksheet, new object[]{ (i + 1), fileName, inputData.CitiesCount, exactBestCost,
                         inputData.BestInitialSolutionCost, solution1.Cost, RelativeError(solution1.Cost, exactBestCost), solution1.Duration, "", "", "" },
                         currentRowIdx, table1StartCol - 1);
-                    PutValuesRow(worksheet2, new object[]{ (i + 1), fileName, inputData.CitiesCount, exactBestCost, solution1.Cost }, i + 2, 1);
+
+                    PutValuesRow(worksheet2, new object[]{ (i + 1), fileName, inputData.CitiesCount, exactBestCost, Solution.GetSolutionCost(solution1.Path, inputData.GraphMatrix) }, i + 3, 1);
+                    solution1.PrintToXLS(worksheet2, i + 3, 6);
                 }
 
                 package.Save();
