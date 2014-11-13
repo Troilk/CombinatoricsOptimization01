@@ -45,6 +45,7 @@
     <Compile Include="LocalSearchSolver.cs" />
     <Compile Include="Solution.cs" />
     <Compile Include="CyclicArray.cs" />
+    <Compile Include="SimulatedAnnealingSolver.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

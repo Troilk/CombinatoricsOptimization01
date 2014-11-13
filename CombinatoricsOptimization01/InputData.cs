@@ -8,15 +8,18 @@ namespace CombinatoricsOptimization01
 {
 	public class InputData
 	{
-		public const int INITIAL_SOLUTIONS_COUNT = 17;
+		const int INITIAL_SOLUTIONS_COUNT = 10;
+        const bool USE_FIXED_SOLUTIONS_COUNT = true;
         public const double INFIINITY = 99999.0;
         public const double LESS_INFINITY = INFIINITY * 0.5;
 		static Regex numberInString = new Regex(@"\d+", RegexOptions.Compiled);
 
 		public int CitiesCount;
-        public Solution[] InitialSolutions = new Solution[INITIAL_SOLUTIONS_COUNT];
+        public Solution[] InitialSolutions;
         public double BestInitialSolutionCost = INFIINITY;
 		public double[,] GraphMatrix;
+
+        public int InitalSolutionsCount { get { return USE_FIXED_SOLUTIONS_COUNT ? INITIAL_SOLUTIONS_COUNT : this.CitiesCount; } }
 
 		public InputData(string pathToInputFile)
 		{
@@ -26,7 +29,6 @@ namespace CombinatoricsOptimization01
 			Log.LogBlockStart("Parsing input file: " + pathToInputFile);
 
 			XmlReader subReader;
-            int[][] initialSolutionsPaths = new int[INITIAL_SOLUTIONS_COUNT][];
 			int[] initialSolution = null;
 
 			//int parseNodeTypesMask = (1 << (int)XmlNodeType.Element) | (1 << (int)XmlNodeType.Text);
@@ -44,7 +46,10 @@ namespace CombinatoricsOptimization01
 				}
 
 				// reading initial solutions
-				for(int i = 0; i < INITIAL_SOLUTIONS_COUNT; ++i)
+                int initialSolutionsCount = USE_FIXED_SOLUTIONS_COUNT ? INITIAL_SOLUTIONS_COUNT : this.CitiesCount;
+                int[][] initialSolutionsPaths = new int[initialSolutionsCount][];
+
+                for(int i = 0; i < initialSolutionsCount; ++i)
 				{
 					reader.ReadToFollowing("path");
 
@@ -104,8 +109,9 @@ namespace CombinatoricsOptimization01
                     this.GraphMatrix[i, i] = INFIINITY;
 
                 // creating initial solutions with costs
+                this.InitialSolutions = new Solution[initialSolutionsCount];
                 Solution sol;
-                for (int i = 0; i < INITIAL_SOLUTIONS_COUNT; ++i)
+                for (int i = 0; i < initialSolutionsCount; ++i)
                 {
                     sol = new Solution(initialSolutionsPaths[i], this.GraphMatrix);
                     this.InitialSolutions[i] = sol;

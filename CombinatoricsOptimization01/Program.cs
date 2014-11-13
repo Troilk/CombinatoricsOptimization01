@@ -94,9 +94,10 @@ namespace CombinatoricsOptimization01
                 stopwatch.Stop();
                 InputData inputData;
 
-                Solution solution1 = null, solution2 = null;
-                Solution recordSolution = null;
+                Solution solution = null;
+                Solution recordSolution1 = null, recordSolution2 = null;
                 LocalSearchSolver lsSolver = new LocalSearchSolver();
+                SimulatedAnnealingSolver saSolver = new SimulatedAnnealingSolver();
 
                 for (int i = 0; i < inputFiles.Length; ++i)
                 {
@@ -121,37 +122,53 @@ namespace CombinatoricsOptimization01
                     //Solution sl = new Solution(new int[]{ 12, 9, 7, 8, 13, 0, 14, 5, 10, 4, 1, 6, 11, 16, 2, 15, 3}, inputData.GraphMatrix);
                      
                     // run algorithms and measure time
+                    recordSolution1 = null;
+                    recordSolution2 = null;
 
-                    for (int j = 0; j < InputData.INITIAL_SOLUTIONS_COUNT; ++j)
+                    for (int j = 0; j < inputData.InitalSolutionsCount; ++j)
                     {
                         GC.Collect();
                         stopwatch.Restart();
 
-                        solution1 = lsSolver.Solve(inputData.InitialSolutions[j], inputData.GraphMatrix);
+                        solution = lsSolver.Solve(inputData.InitialSolutions[j], inputData.GraphMatrix);
 
                         stopwatch.Stop();
-                        solution1.Duration = stopwatch.Elapsed.TotalSeconds;
+                        solution.Duration = stopwatch.Elapsed.TotalSeconds;
 
-                        if (recordSolution == null)
-                            recordSolution = solution1;
-                        else if (recordSolution.Cost > solution1.Cost)
-                            recordSolution = solution1;
+                        if (recordSolution1 == null)
+                            recordSolution1 = solution;
+                        else if (recordSolution1.Cost > solution.Cost)
+                            recordSolution1 = solution;
                     }
 
-                    GC.Collect();
-                    stopwatch.Restart();
-                    //TODO: solve the staff, method 2
-                    stopwatch.Stop();
-                    //time2 = stopwatch.Elapsed.TotalSeconds;
+                    for (int j = 0; j < inputData.InitalSolutionsCount; ++j)
+                    {
+                        GC.Collect();
+                        stopwatch.Restart();
+
+                        solution = saSolver.Solve(inputData.InitialSolutions[j], inputData.GraphMatrix);
+
+                        stopwatch.Stop();
+                        solution.Duration = stopwatch.Elapsed.TotalSeconds;
+
+                        if (recordSolution2 == null)
+                            recordSolution2 = solution;
+                        else if (recordSolution2.Cost > solution.Cost)
+                            recordSolution2 = solution;
+                    }
 
                     // print results to worksheet
                     currentRowIdx = table1StartRow + 2 + i;
                     PutValuesRow(worksheet, new object[]{ (i + 1), fileName, inputData.CitiesCount, exactBestCost,
-                        inputData.BestInitialSolutionCost, solution1.Cost, RelativeError(solution1.Cost, exactBestCost), solution1.Duration, "", "", "" },
+                        inputData.BestInitialSolutionCost, recordSolution1.Cost, RelativeError(recordSolution1.Cost, exactBestCost), recordSolution1.Duration, 
+                        recordSolution2.Cost, RelativeError(recordSolution2.Cost, exactBestCost), recordSolution2.Duration },
                         currentRowIdx, table1StartCol - 1);
 
-                    PutValuesRow(worksheet2, new object[]{ (i + 1), fileName, inputData.CitiesCount, exactBestCost, Solution.GetSolutionCost(solution1.Path, inputData.GraphMatrix) }, i + 3, 1);
-                    solution1.PrintToXLS(worksheet2, i + 3, 6);
+                    // output global best solution to second tab
+                    if (recordSolution2.Cost < recordSolution1.Cost)
+                        recordSolution1 = recordSolution2;
+                    PutValuesRow(worksheet2, new object[]{ (i + 1), fileName, inputData.CitiesCount, exactBestCost, Solution.GetSolutionCost(recordSolution1.Path, inputData.GraphMatrix) }, i + 3, 1);
+                    recordSolution1.PrintToXLS(worksheet2, i + 3, 6);
                 }
 
                 package.Save();
