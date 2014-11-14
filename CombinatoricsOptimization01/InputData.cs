@@ -2,6 +2,7 @@
 using System.IO;
 using System.Xml;
 using System.Globalization;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace CombinatoricsOptimization01
@@ -16,6 +17,8 @@ namespace CombinatoricsOptimization01
 
 		public int CitiesCount;
         public Solution[] InitialSolutions;
+        public double AverageEdgeLength;
+        public double AverageVariance;
         public double BestInitialSolutionCost = INFIINITY;
 		public double[,] GraphMatrix;
 
@@ -30,8 +33,6 @@ namespace CombinatoricsOptimization01
 
 			XmlReader subReader;
 			int[] initialSolution = null;
-
-			//int parseNodeTypesMask = (1 << (int)XmlNodeType.Element) | (1 << (int)XmlNodeType.Text);
 
 			using(XmlReader reader = XmlTextReader.Create(pathToInputFile))
 			{
@@ -111,6 +112,7 @@ namespace CombinatoricsOptimization01
                 // creating initial solutions with costs
                 this.InitialSolutions = new Solution[initialSolutionsCount];
                 Solution sol;
+
                 for (int i = 0; i < initialSolutionsCount; ++i)
                 {
                     sol = new Solution(initialSolutionsPaths[i], this.GraphMatrix);
@@ -118,6 +120,39 @@ namespace CombinatoricsOptimization01
                     if (sol.Cost < this.BestInitialSolutionCost)
                         this.BestInitialSolutionCost = sol.Cost;
                 }
+
+                // finding avarage edge length
+                double averageLength = 0.0;
+                int totalEdges = 0;
+
+                for (int i = 0; i < this.CitiesCount; ++i)
+                {
+                    for(int j = 0; j < this.CitiesCount; ++j)
+                    {
+                        value = this.GraphMatrix[i, j];
+                        if (value != INFIINITY)
+                        {
+                            averageLength += value;
+                            ++totalEdges;
+                        }
+                    }
+                }
+
+                averageLength /= totalEdges;
+
+                this.AverageEdgeLength = averageLength;
+
+                double averageVariance = 0.0;
+                for (int i = 0; i < this.CitiesCount; ++i)
+                {
+                    for (int j = 0; j < this.CitiesCount; ++j)
+                    {
+                        value = this.GraphMatrix[i, j];
+                        if (value != INFIINITY)
+                            averageVariance += (value - averageLength) * (value - averageLength);
+                    }
+                }
+                this.AverageVariance = averageVariance / totalEdges;
 			}
 		}
 

@@ -52,6 +52,7 @@ namespace CombinatoricsOptimization01
 
 		public static void Main(string[] args)
 		{
+            Stopwatch globalStopwatch = Stopwatch.StartNew();
 			Log.LogGlobal ("Program started");
 
             DirectoryInfo outDirInfo = new DirectoryInfo(Environment.CurrentDirectory);
@@ -76,23 +77,26 @@ namespace CombinatoricsOptimization01
                 // printing headers
                 PutHeadersToWorksheet(worksheet, new string[]{ "", "Назва задачі", "n", "f*", "f0" }, 
                     table1StartRow, table1StartCol - 1, 2, 1);
-                PutHeadersToWorksheet(worksheet, new string[]{ "Детермінований локальний пошук", "Інший алгоритм ЛП" }, 
+                PutHeadersToWorksheet(worksheet, new string[]{ "Детермінований локальний пошук", "Імітаційний Відпал" }, 
                     table1StartRow, table1StartCol + 4, 1, 3);
-                PutValuesRow(worksheet, new string[]{ "f", "E", "t", "f", "E", "t" }, 
+                PutValuesRow(worksheet, new string[]{ "f1", "E1", "t1", "f2", "E2", "t2" }, 
                     table1StartRow + 1, table1StartCol + 4);
+                PutHeadersToWorksheet(worksheet, new string[]{ "f2 - f1", "E2 - E1", "t2 / t1" }, 
+                    table1StartRow, table1StartCol + 10, 2, 1);
 
                 // generating second (solutions) worksheet
                 ExcelWorksheet worksheet2 = package.Workbook.Worksheets.Add("Розв’язки");
-                PutHeadersToWorksheet(worksheet2, new string[]{ "", "Назва задачі", "n", "f*", "f record",
-                    "Найкращий розв'язок (перестановка)" }, 1, 1, 2, 1);
+                PutHeadersToWorksheet(worksheet2, new string[]{ "", "Назва задачі", "n", "f*", "f record" }, 1, 1, 2, 1);
 
                 string fileName;
                 string filePath;
+                int maxCitiesCount = 0;
                 double exactBestCost;
                 int currentRowIdx;
                 Stopwatch stopwatch = Stopwatch.StartNew();
                 stopwatch.Stop();
                 InputData inputData;
+                double relError1, relError2;
 
                 Solution solution = null;
                 Solution recordSolution1 = null, recordSolution2 = null;
@@ -116,6 +120,9 @@ namespace CombinatoricsOptimization01
                         continue;
                     }
 
+                    if (inputData.CitiesCount > maxCitiesCount)
+                        maxCitiesCount = inputData.CitiesCount;
+
                     //debug
 //                    if (i == 0)
 //                    inputData.PrintGraph();
@@ -130,7 +137,7 @@ namespace CombinatoricsOptimization01
                         GC.Collect();
                         stopwatch.Restart();
 
-                        solution = lsSolver.Solve(inputData.InitialSolutions[j], inputData.GraphMatrix);
+                        solution = lsSolver.Solve(inputData.InitialSolutions[j], inputData);
 
                         stopwatch.Stop();
                         solution.Duration = stopwatch.Elapsed.TotalSeconds;
@@ -146,7 +153,7 @@ namespace CombinatoricsOptimization01
                         GC.Collect();
                         stopwatch.Restart();
 
-                        solution = saSolver.Solve(inputData.InitialSolutions[j], inputData.GraphMatrix);
+                        solution = saSolver.Solve(inputData.InitialSolutions[j], inputData);
 
                         stopwatch.Stop();
                         solution.Duration = stopwatch.Elapsed.TotalSeconds;
@@ -157,11 +164,22 @@ namespace CombinatoricsOptimization01
                             recordSolution2 = solution;
                     }
 
+                    // Validate record solutions
+                    if (!recordSolution1.ValidateSolution(inputData.GraphMatrix))
+                        Log.LogError("Solution not valid { " + fileName + ", algorithm: 1 }");
+                    if (!recordSolution2.ValidateSolution(inputData.GraphMatrix))
+                        Log.LogError("Solution not valid { " + fileName + ", algorithm: 2 }");
+
                     // print results to worksheet
+                    relError1 = RelativeError(recordSolution1.Cost, exactBestCost);
+                    relError2 = RelativeError(recordSolution2.Cost, exactBestCost);
                     currentRowIdx = table1StartRow + 2 + i;
+
                     PutValuesRow(worksheet, new object[]{ (i + 1), fileName, inputData.CitiesCount, exactBestCost,
-                        inputData.BestInitialSolutionCost, recordSolution1.Cost, RelativeError(recordSolution1.Cost, exactBestCost), recordSolution1.Duration, 
-                        recordSolution2.Cost, RelativeError(recordSolution2.Cost, exactBestCost), recordSolution2.Duration },
+                        inputData.BestInitialSolutionCost, recordSolution1.Cost, relError1, recordSolution1.Duration, 
+                        recordSolution2.Cost, relError2, recordSolution2.Duration,
+                        recordSolution2.Cost - recordSolution1.Cost, relError2 - relError1,
+                        recordSolution2.Duration / recordSolution1.Duration },
                         currentRowIdx, table1StartCol - 1);
 
                     // output global best solution to second tab
@@ -171,8 +189,12 @@ namespace CombinatoricsOptimization01
                     recordSolution1.PrintToXLS(worksheet2, i + 3, 6);
                 }
 
+                PutHeadersToWorksheet(worksheet2, new string[]{ "Найкращий розв'язок (перестановка)" }, 1, 6, 2, maxCitiesCount);
                 package.Save();
             }
+
+            globalStopwatch.Stop();
+            Log.LogGlobal("Program finished execution. Elasped time: " + globalStopwatch.Elapsed.TotalSeconds);
 
             Process.Start(newFile.FullName);
 		}

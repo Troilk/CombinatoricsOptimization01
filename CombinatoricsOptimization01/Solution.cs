@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using OfficeOpenXml;
 
 namespace CombinatoricsOptimization01
@@ -34,11 +35,8 @@ namespace CombinatoricsOptimization01
         public void CopySolution(Solution other)
         {
             this.cost = other.cost;
-            int[] otherPath = other.path;
-            int pathLength = otherPath.Length;
-
-            for (int i = 0; i < pathLength; ++i)
-                this.path[i] = otherPath[i];
+            //other.path.CopyTo(this.path, 0);
+            Buffer.BlockCopy(other.path, 0, this.path, 0, this.path.Length * sizeof(int));
         }
 
         public void PrintToXLS(ExcelWorksheet worksheet, int startRow, int startCol)
@@ -64,6 +62,43 @@ namespace CombinatoricsOptimization01
             currentCost += graphMatrix[iVal, path[0]];
 
             return currentCost;
+        }
+
+        public void PrintSolution()
+        {
+            int l = this.path.Length;
+            string solutionStr = "{ " + this.path[0];
+
+            for (int i = 1; i < l; ++i)
+                solutionStr += ", " + this.path[i];
+            Log.LogSolution(solutionStr + " }");
+        }
+
+        public bool ValidateSolution(double[,] graphMatrix)
+        {
+            int l = this.path.Length;
+            int node;
+            List<int> visitedNodes = new List<int>(l);
+
+            for (int i = 0; i < l; ++i)
+            {
+                if (visitedNodes.Contains(node = this.path[i]))
+                {
+                    Log.LogError("Validation error: node " + node + " already visited");
+                    this.PrintSolution();
+                    return false;
+                }
+                visitedNodes.Add(node);
+            }
+
+            if (Math.Abs(GetSolutionCost(this.path, graphMatrix) - this.cost) > 0.00000001)
+            {
+                Log.LogError("Validation error: path cost incorrect");
+                this.PrintSolution();
+                return false;
+            }
+
+            return true;
         }
     }
 }

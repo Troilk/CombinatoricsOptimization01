@@ -27,5 +27,11 @@ namespace CombinatoricsOptimization01
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine(message);
 		}
+
+        public static void LogSolution(object message)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(message);
+        }
 	}
 }
